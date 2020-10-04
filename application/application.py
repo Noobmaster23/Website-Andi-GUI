@@ -15,6 +15,16 @@ import datetime
 from PIL import Image, ImageDraw, ImageFont, ImageEnhance
 
 import os
+#auto-py-to-exe
+def resource_path(relative_path):
+    """ Get absolute path to resource, works for dev and for PyInstaller """
+    try:
+        # PyInstaller creates a temp folder and stores path in _MEIPASS
+        base_path = sys._MEIPASS
+    except Exception:
+        base_path = os.path.abspath(".")
+
+    return os.path.join(base_path, relative_path)
 # image editing
 
 
@@ -28,7 +38,7 @@ def make_copyright_image(image_path, gallery_path, img_name):
     img.convert("RGB")
     watermark = Image.new("RGBA", img.size, (0, 0, 0, 0))
     size = 2
-    font = 'Raleway-Light.ttf'
+    font = resource_path("Raleway-Light.ttf")
     n_font = ImageFont.truetype(font, size)
     text = "© Andreas Heeb" + str(datetime.datetime.now().year)
     n_width, n_height = n_font.getsize(text)
@@ -59,7 +69,7 @@ def make_thumbnail_image(gallery_path, img_name):
 # tkinter background stuff
 window = tkinter.Tk()
 window.title("Heebphotography.ch")
-window.wm_iconbitmap("favicon.ico")
+window.wm_iconbitmap(resource_path("favicon.ico"))
 # connect to database
 # so eifach chasch du sack nöd uf mini db zuägriffä :)
 password = simpledialog.askstring(
