@@ -4,6 +4,7 @@ from tkinter import StringVar, filedialog
 from tkinter import simpledialog
 from tkinter.constants import END
 from tkinter import messagebox
+import PIL
 
 import psycopg2
 
@@ -19,7 +20,7 @@ import os
 
 def make_copyright_image(image_path, gallery_path, img_name):
     result = {"width": 0, "height": 0, "size": 0,
-              "new_img_path": "", "compressed": False}
+              "new_img_path": ""}
     img = Image.open(image_path)
     result["width"] = img.size[0]
     result["height"] = img.size[1]
@@ -27,7 +28,7 @@ def make_copyright_image(image_path, gallery_path, img_name):
     img.convert("RGB")
     watermark = Image.new("RGBA", img.size, (0, 0, 0, 0))
     size = 2
-    font = r'application\Raleway-Light.ttf'
+    font = 'Raleway-Light.ttf'
     n_font = ImageFont.truetype(font, size)
     text = "© Andreas Heeb" + str(datetime.datetime.now().year)
     n_width, n_height = n_font.getsize(text)
@@ -41,25 +42,30 @@ def make_copyright_image(image_path, gallery_path, img_name):
     alpha = ImageEnhance.Brightness(alpha).enhance(0.25)
     watermark.putalpha(alpha)
     watermark = Image.composite(watermark, img, watermark)
-    watermark.save(gallery_path + img_name + ".jpg")
+    watermark.save(gallery_path + img_name + ".jpg", optimize=True, quality=95)
     result["new_img_path"] = gallery_path + img_name + ".jpg"
     return result
 
 
-def make_thumbnail_image():
-    pass
+def make_thumbnail_image(gallery_path, img_name):
+    img = Image.open(gallery_path + img_name + ".jpg")
+    img = img.resize((int(img.size[0]/5), int(img.size[1]/5)), Image.ANTIALIAS)
+    size = img.size
+    img.save(gallery_path + "thumbnail/" + img_name +
+             ".jpg", optimize=True, quality=50)
+    return [os.path.getsize(gallery_path + "thumbnail/" + img_name + ".jpg"), size[0], size[1]]
 
 
 # tkinter background stuff
 window = tkinter.Tk()
 window.title("Heebphotography.ch")
-window.wm_iconbitmap(r"application\favicon.ico")
+window.wm_iconbitmap("favicon.ico")
 # connect to database
 # so eifach chasch du sack nöd uf mini db zuägriffä :)
 password = simpledialog.askstring(
     title="Database Password", prompt="Password:")
 conn = psycopg2.connect(host="heebphotography.ch", port="5500",
-                        database="heebphotography.ch-testing", user="postgres", password=password)
+                        database="heebphotography", user="postgres", password=password)
 # layout
 # select image
 selected_images = tkinter.StringVar()
@@ -244,8 +250,10 @@ def submit():
     if bool(selected_images.get()) and bool(gallery_path.get()) and (bool(category_selection.curselection()) or bool(custom_category.get())) and (bool(type_selection.curselection() or bool(custom_type.get()))):
         # uploads the full_img to the database
         db_name = uuid.uuid1()
-        db_category = custom_category.get() if bool(custom_category.get()) else category_selection.get(category_selection.curselection())
-        db_type = custom_type.get() if bool(custom_type.get()) else type_selection.get(type_selection.curselection())
+        db_category = custom_category.get() if bool(custom_category.get(
+        )) else category_selection.get(category_selection.curselection())
+        db_type = custom_type.get() if bool(
+            custom_type.get()) else type_selection.get(type_selection.curselection())
         db_comment = entry_comment.get() if bool(entry_comment.get()) else "NULL"
         db_upload_date = datetime.datetime.now()
         img_editing_result = make_copyright_image(
@@ -257,19 +265,26 @@ def submit():
         db_upload_date = str(db_upload_date)
         db_width = str(img_editing_result["width"])
         db_height = str(img_editing_result["height"])
-        db_compressed = str(img_editing_result["compressed"]).lower()
         db_size = str(img_editing_result["size"])
+        thumbnail_result = make_thumbnail_image(
+            gallery_path.get() + "/", db_name)
+        db_thumbnail_size = str(thumbnail_result[0])
+        db_thumbnail_width = str(thumbnail_result[1])
+        db_thumbnail_height = str(thumbnail_result[2])
+
         sql_query = """
-        INSERT INTO images (name, category, type, comment, upload_date, width, height, compressed, size)
-        VALUES (%s, %s, %s, %s, %s, %s, %s, %s, %s);
+        INSERT INTO images (name, category, type, comment, upload_date, width, height, size, thumbnail_size, thumbnail_width, thumbnail_height)
+        VALUES (%s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s);
         """
         cur = conn.cursor()
-        cur.execute(sql_query, (db_name, db_category, db_type, db_comment, db_upload_date, db_width, db_height, db_compressed, db_size))
-        # uploads the thumbnail to the database
+        cur.execute(sql_query, (db_name, db_category, db_type, db_comment, db_upload_date, db_width,
+                                db_height, db_size, db_thumbnail_size, db_thumbnail_width, db_thumbnail_height))
         conn.commit()
+        messagebox.showinfo(
+            "Success!", "Image uploaded successfully. Please don't forget to also update GitHub!")
 
     else:
-        messagebox.showerror("Do you have stupid?",
+        messagebox.showerror("Idiot Sanwdich",
                              "Not everything is filled out!")
 
 
