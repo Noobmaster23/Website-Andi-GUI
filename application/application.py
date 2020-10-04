@@ -4,8 +4,21 @@ from tkinter import StringVar, filedialog
 from tkinter import simpledialog
 from tkinter.constants import END
 from tkinter import messagebox
+
+import os
+
+try:
+    import PIL
+except ImportError:
+    print("Trying to Install required module: requests\n")
+    os.system('python -m pip install Pillow')
 import PIL
 
+try:
+    import psycopg2
+except ImportError:
+    print("Trying to Install required module: requests\n")
+    os.system('python -m pip install Pillow')
 import psycopg2
 
 import uuid
@@ -13,8 +26,6 @@ import uuid
 import datetime
 
 from PIL import Image, ImageDraw, ImageFont, ImageEnhance
-
-import os
 # image editing
 
 
