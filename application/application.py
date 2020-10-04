@@ -10,15 +10,15 @@ import os
 try:
     import PIL
 except ImportError:
-    print("Trying to Install required module: requests\n")
+    print("Trying to Install required module: Pillow\n")
     os.system('python -m pip install Pillow')
 import PIL
 
 try:
     import psycopg2
 except ImportError:
-    print("Trying to Install required module: requests\n")
-    os.system('python -m pip install Pillow')
+    print("Trying to Install required module: psycopg2\n")
+    os.system('python -m pip install psycopg2')
 import psycopg2
 
 import uuid
