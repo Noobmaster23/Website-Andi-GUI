@@ -397,13 +397,17 @@ entry_comment = tkinter.Entry(window, textvariable=comment)
 
 
 def submit():
-    if bool(selected_images.get()) and bool(gallery_path.get()) and (bool(category_selection.curselection()) or bool(custom_category.get())) and (bool(type_selection.curselection() or bool(custom_type.get()))):
+    if bool(selected_images.get()) and bool(gallery_path.get()) and (bool(category_selection.curselection()) or bool(custom_category.get())) and (bool(type_selection.curselection() or bool(custom_type.get()))) and ((bool(de_category_selection.curselection()) or bool(de_custom_category.get())) and (bool(de_type_selection.curselection() or bool(de_custom_type.get())))):
         # uploads the full_img to the database
         db_name = uuid.uuid1()
         db_category = custom_category.get() if bool(custom_category.get(
         )) else category_selection.get(category_selection.curselection())
+        db_de_category = de_custom_category.get() if bool(de_custom_category.get(
+        )) else de_category_selection.get(de_category_selection.curselection())
         db_type = custom_type.get() if bool(
             custom_type.get()) else type_selection.get(type_selection.curselection())
+        db_de_type = de_custom_type.get() if bool(
+            de_custom_type.get()) else de_type_selection.get(de_type_selection.curselection())
         db_comment = entry_comment.get() if bool(entry_comment.get()) else "NULL"
         db_upload_date = datetime.datetime.now()
         img_editing_result = make_copyright_image(
@@ -421,14 +425,16 @@ def submit():
         db_thumbnail_size = str(thumbnail_result[0])
         db_thumbnail_width = str(thumbnail_result[1])
         db_thumbnail_height = str(thumbnail_result[2])
+        db_de_category = str(db_de_category)
+        db_de_type = str(db_de_type)
 
         sql_query = """
-        INSERT INTO images (name, category, type, comment, upload_date, width, height, size, thumbnail_size, thumbnail_width, thumbnail_height)
-        VALUES (%s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s);
+        INSERT INTO images (name, category, type, comment, upload_date, width, height, size, thumbnail_size, thumbnail_width, thumbnail_height, de_category, de_type)
+        VALUES (%s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s);
         """
         cur = conn.cursor()
         cur.execute(sql_query, (db_name, db_category, db_type, db_comment, db_upload_date, db_width,
-                                db_height, db_size, db_thumbnail_size, db_thumbnail_width, db_thumbnail_height))
+                                db_height, db_size, db_thumbnail_size, db_thumbnail_width, db_thumbnail_height, db_de_category, db_de_type))
         conn.commit()
         messagebox.showinfo(
             "Success!", "Image uploaded successfully. Please don't forget to also update GitHub!")
