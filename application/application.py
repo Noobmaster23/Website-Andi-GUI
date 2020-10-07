@@ -72,11 +72,10 @@ window = tkinter.Tk()
 window.title("Heebphotography.ch")
 window.wm_iconbitmap("favicon.ico")
 # connect to database
-# so eifach chasch du sack nöd uf mini db zuägriffä :)
 password = simpledialog.askstring(
     title="Database Password", prompt="Password:")
 conn = psycopg2.connect(host="heebphotography.ch", port="5500",
-                        database="heebphotography", user="postgres", password=password)
+                        database="heebphotography", user="postgres", password=password) # so eifach chasch du sack nöd uf mini db zuägriffä :)
 # layout
 # select image
 selected_images = tkinter.StringVar()
