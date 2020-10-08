@@ -413,8 +413,8 @@ def submit():
         img_editing_result = make_copyright_image(
             selected_images.get(), gallery_path.get() + "/", str(db_name))
         db_name = str(db_name)
-        db_category = str(db_category)
-        db_type = str(db_type)
+        db_category = str(db_category).replace(" ", "_")
+        db_type = str(db_type).replace(" ", "_")
         db_comment = str(db_comment)
         db_upload_date = str(db_upload_date)
         db_width = str(img_editing_result["width"])
@@ -425,8 +425,8 @@ def submit():
         db_thumbnail_size = str(thumbnail_result[0])
         db_thumbnail_width = str(thumbnail_result[1])
         db_thumbnail_height = str(thumbnail_result[2])
-        db_de_category = str(db_de_category)
-        db_de_type = str(db_de_type)
+        db_de_category = str(db_de_category).replace(" ", "_")
+        db_de_type = str(db_de_type).replace(" ", "_")
 
         sql_query = """
         INSERT INTO images (name, category, type, comment, upload_date, width, height, size, thumbnail_size, thumbnail_width, thumbnail_height, de_category, de_type)
