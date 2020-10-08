@@ -52,7 +52,7 @@ def make_copyright_image(image_path, gallery_path, img_name):
     draw = ImageDraw.Draw(watermark, 'RGBA')
     draw.text((0, (watermark.size[1] - n_height)), text, font=n_font)
     alpha = watermark.split()[3]
-    alpha = ImageEnhance.Brightness(alpha).enhance(0.25)
+    alpha = ImageEnhance.Brightness(alpha).enhance(0.5)
     watermark.putalpha(alpha)
     watermark = Image.composite(watermark, img, watermark)
     watermark.save(gallery_path + img_name + ".jpg", optimize=True, quality=95)
