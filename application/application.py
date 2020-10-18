@@ -20,7 +20,7 @@ try:
     import psycopg2
 except ImportError:
     print("Trying to Install required module: psycopg2\n")
-    os.system('python -m pip install psycopg2')
+    os.system('python -m pip install psycopg2-binary')
 import psycopg2
 
 import uuid
