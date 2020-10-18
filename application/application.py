@@ -50,7 +50,7 @@ def make_copyright_image(image_path, gallery_path, img_name):
         n_font = ImageFont.truetype(font, size)
         n_width, n_height = n_font.getsize(text)
     draw = ImageDraw.Draw(watermark, 'RGBA')
-    draw.text((0, (watermark.size[1] - n_height)), text, font=n_font)
+    draw.text((watermark.size[0] - n_width, (watermark.size[1] - n_height)), text, font=n_font)
     alpha = watermark.split()[3]
     alpha = ImageEnhance.Brightness(alpha).enhance(0.5)
     watermark.putalpha(alpha)
