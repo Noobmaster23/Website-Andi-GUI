@@ -445,6 +445,11 @@ def submit():
 
 
 submit_button = tkinter.Button(window, text="Submit", command=submit)
+# Menubar
+menubar = tkinter.Menu(window)
+# Adds options menu and commands
+options = tkinter.Menu(menubar, tearoff=0)
+menubar.add_command(label="test", command=print("lol"))
 # makes the window
 # select image
 label_select_image.grid(row=0, column=0)
@@ -484,4 +489,5 @@ entry_comment.grid(row=13, column=0, columnspan=2)
 # submit button
 submit_button.grid(row=14, column=0, columnspan=2)
 # window
+window.config(menu=menubar)
 window.mainloop()
