@@ -70,9 +70,9 @@ def make_thumbnail_image(gallery_path, img_name):
 
 
 # tkinter background stuff
-window = tkinter.Tk()
-window.title("Heebphotography.ch")
-window.wm_iconbitmap("favicon.ico")
+root = tkinter.Tk()
+root.title("Heebphotography.ch")
+root.wm_iconbitmap("favicon.ico")
 # connect to database
 password = simpledialog.askstring(
     title="Database Password", prompt="Password:")
@@ -82,8 +82,8 @@ conn = psycopg2.connect(host="heebphotography.ch", port="5500",
 # select image
 selected_images = tkinter.StringVar()
 
-label_select_image = tkinter.Label(window, text="Select Image:", fg="red")
-path_to_image = tkinter.Label(window, textvariable=selected_images, fg="green")
+label_select_image = tkinter.Label(root, text="Select Image:", fg="red")
+path_to_image = tkinter.Label(root, textvariable=selected_images, fg="green")
 
 
 def save_image_path():
@@ -91,17 +91,17 @@ def save_image_path():
         title="Select the image", filetypes=(("jpeg files", "*.jpg"), ("all files", "*.*"))))
     button_select_image.config(fg="black")
     label_select_image.config(fg="black")
-    window.update()
+    root.update()
 
 
 button_select_image = tkinter.Button(
-    window, text="Select Image", command=save_image_path, fg="red")
+    root, text="Select Image", command=save_image_path, fg="red")
 # path to gallery
 gallery_path = tkinter.StringVar()
 
 label_gallery_path = tkinter.Label(
-    window, text="Select the path to the gallery folder:", fg="red")
-path_to_gallery = tkinter.Label(window, textvariable=gallery_path, fg="green")
+    root, text="Select the path to the gallery folder:", fg="red")
+path_to_gallery = tkinter.Label(root, textvariable=gallery_path, fg="green")
 
 
 def select_gallery_path():
@@ -109,15 +109,15 @@ def select_gallery_path():
     gallery_path.set(filedialog.askdirectory())
     label_gallery_path.config(fg="black")
     button_gallery_path.config(fg="black")
-    window.update()
+    root.update()
 
 
 button_gallery_path = tkinter.Button(
-    window, text="Select Path", command=select_gallery_path, fg="red")
+    root, text="Select Path", command=select_gallery_path, fg="red")
 # category selection
-label_category = tkinter.Label(window, text="Select a category...:", fg="red")
+label_category = tkinter.Label(root, text="Select a category...:", fg="red")
 
-category_selection = tkinter.Listbox(window, fg="red", exportselection=0)
+category_selection = tkinter.Listbox(root, fg="red", exportselection=0)
 
 
 def category_listbox_changed(*args):
@@ -156,7 +156,7 @@ while category != None and category[0] != None:
     category = cur.fetchone()
 # lets user add own option
 label_custom_category = tkinter.Label(
-    window, text="...or add a new one:", fg="red")
+    root, text="...or add a new one:", fg="red")
 custom_category = StringVar()
 custom_category.set("")
 
@@ -181,11 +181,11 @@ def changed_custom_category(*args):
 
 custom_category.trace_add("write", changed_custom_category)
 entry_custom_category = tkinter.Entry(
-    window, fg="red", textvariable=custom_category)
+    root, fg="red", textvariable=custom_category)
 # type selection
-label_type = tkinter.Label(window, text="Select a type...:", fg="red")
+label_type = tkinter.Label(root, text="Select a type...:", fg="red")
 
-type_selection = tkinter.Listbox(window, fg="red", exportselection=0)
+type_selection = tkinter.Listbox(root, fg="red", exportselection=0)
 
 
 def type_listbox_changed(*args):
@@ -224,7 +224,7 @@ while type_ != None and type_[0] != None:
     type_ = cur.fetchone()
 # lets user add own option
 label_custom_type = tkinter.Label(
-    window, text="...or add a new one:", fg="red")
+    root, text="...or add a new one:", fg="red")
 custom_type = StringVar()
 custom_type.set("")
 
@@ -248,12 +248,12 @@ def changed_custom_type(*args):
 
 
 custom_type.trace_add("write", changed_custom_type)
-entry_custom_type = tkinter.Entry(window, fg="red", textvariable=custom_type)
+entry_custom_type = tkinter.Entry(root, fg="red", textvariable=custom_type)
 # german category selection
 de_label_category = tkinter.Label(
-    window, text="Select a german category...:", fg="red")
+    root, text="Select a german category...:", fg="red")
 
-de_category_selection = tkinter.Listbox(window, fg="red", exportselection=0)
+de_category_selection = tkinter.Listbox(root, fg="red", exportselection=0)
 
 
 def de_category_listbox_changed(*args):
@@ -292,7 +292,7 @@ while de_category != None and de_category[0] != None:
     de_category = cur.fetchone()
 # lets user add own option
 de_label_custom_category = tkinter.Label(
-    window, text="...or add a new one:", fg="red")
+    root, text="...or add a new one:", fg="red")
 de_custom_category = StringVar()
 de_custom_category.set("")
 
@@ -317,12 +317,12 @@ def de_changed_custom_category(*args):
 
 de_custom_category.trace_add("write", de_changed_custom_category)
 de_entry_custom_category = tkinter.Entry(
-    window, fg="red", textvariable=de_custom_category)
+    root, fg="red", textvariable=de_custom_category)
 # german type selection
 de_label_type = tkinter.Label(
-    window, text="Select a german type...:", fg="red")
+    root, text="Select a german type...:", fg="red")
 
-de_type_selection = tkinter.Listbox(window, fg="red", exportselection=0)
+de_type_selection = tkinter.Listbox(root, fg="red", exportselection=0)
 
 
 def de_type_listbox_changed(*args):
@@ -361,7 +361,7 @@ while de_type != None and de_type[0] != None:
     de_type = cur.fetchone()
 # lets user add own option
 de_label_custom_type = tkinter.Label(
-    window, text="...or add a new one:", fg="red")
+    root, text="...or add a new one:", fg="red")
 de_custom_type = StringVar()
 de_custom_type.set("")
 
@@ -386,13 +386,13 @@ def de_changed_custom_type(*args):
 
 de_custom_type.trace_add("write", de_changed_custom_type)
 de_entry_custom_type = tkinter.Entry(
-    window, fg="red", textvariable=de_custom_type)
+    root, fg="red", textvariable=de_custom_type)
 # add comment
 comment = StringVar()
 comment.set("")
-label_comment = tkinter.Label(window, text="Add an additional comment:")
+label_comment = tkinter.Label(root, text="Add an additional comment:")
 
-entry_comment = tkinter.Entry(window, textvariable=comment)
+entry_comment = tkinter.Entry(root, textvariable=comment)
 # submit button
 
 
@@ -444,9 +444,9 @@ def submit():
                              "Not everything is filled out!")
 
 
-submit_button = tkinter.Button(window, text="Submit", command=submit)
+submit_button = tkinter.Button(root, text="Submit", command=submit)
 # Menubar
-menubar = tkinter.Menu(window)
+menubar = tkinter.Menu(root)
 # Adds options menu and commands
 options = tkinter.Menu(menubar, tearoff=0)
 menubar.add_command(label="test", command=print("lol"))
@@ -489,5 +489,5 @@ entry_comment.grid(row=13, column=0, columnspan=2)
 # submit button
 submit_button.grid(row=14, column=0, columnspan=2)
 # window
-window.config(menu=menubar)
-window.mainloop()
+root.config(menu=menubar)
+root.mainloop()
