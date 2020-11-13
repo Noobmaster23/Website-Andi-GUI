@@ -75,15 +75,6 @@ root.title("Heebphotography.ch")
 root.wm_iconbitmap("favicon.ico")
 # frames
 db_upload = tkinter.Frame(root)
-#est
-test_label = tkinter.Label(db_upload, text="test")
-def testlol():
-    print("lol")
-    db_upload.grid_forget()
-test_button = tkinter.Button(db_upload, command=testlol, text="test lol")
-test_label.pack()
-test_button.pack()
-db_upload.grid(row=15, column=0, columnspan=2)
 # connect to database
 password = simpledialog.askstring(
     title="Database Password", prompt="Password:")
