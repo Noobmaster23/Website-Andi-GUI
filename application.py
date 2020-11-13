@@ -50,7 +50,8 @@ def make_copyright_image(image_path, gallery_path, img_name):
         n_font = ImageFont.truetype(font, size)
         n_width, n_height = n_font.getsize(text)
     draw = ImageDraw.Draw(watermark, 'RGBA')
-    draw.text((watermark.size[0] - n_width, (watermark.size[1] - n_height)), text, font=n_font)
+    draw.text((watermark.size[0] - n_width,
+               (watermark.size[1] - n_height)), text, font=n_font)
     alpha = watermark.split()[3]
     alpha = ImageEnhance.Brightness(alpha).enhance(0.5)
     watermark.putalpha(alpha)
@@ -81,13 +82,14 @@ db_delete = tkinter.Frame(root)
 password = simpledialog.askstring(
     title="Database Password", prompt="Password:")
 conn = psycopg2.connect(host="heebphotography.ch", port="5500",
-                        database="heebphotography", user="postgres", password=password) # so eifach chasch du sack nöd uf mini db zuägriffä :)
+                        database="heebphotography", user="postgres", password=password)  # so eifach chasch du sack nöd uf mini db zuägriffä :)
 # layout
 # select image
 selected_images = tkinter.StringVar()
 
 label_select_image = tkinter.Label(db_upload, text="Select Image:", fg="red")
-path_to_image = tkinter.Label(db_upload, textvariable=selected_images, fg="green")
+path_to_image = tkinter.Label(
+    db_upload, textvariable=selected_images, fg="green")
 
 
 def save_image_path():
@@ -105,7 +107,8 @@ gallery_path = tkinter.StringVar()
 
 label_gallery_path = tkinter.Label(
     db_upload, text="Select the path to the gallery folder:", fg="red")
-path_to_gallery = tkinter.Label(db_upload, textvariable=gallery_path, fg="green")
+path_to_gallery = tkinter.Label(
+    db_upload, textvariable=gallery_path, fg="green")
 
 
 def select_gallery_path():
@@ -119,7 +122,8 @@ def select_gallery_path():
 button_gallery_path = tkinter.Button(
     db_upload, text="Select Path", command=select_gallery_path, fg="red")
 # category selection
-label_category = tkinter.Label(db_upload, text="Select a category...:", fg="red")
+label_category = tkinter.Label(
+    db_upload, text="Select a category...:", fg="red")
 
 category_selection = tkinter.Listbox(db_upload, fg="red", exportselection=0)
 
@@ -148,6 +152,7 @@ all_categories = []
 cur = conn.cursor()
 sql_query = """
 SELECT category FROM images
+WHERE category IS NOT NULL
 GROUP BY category;
 """
 cur.execute(sql_query)
@@ -216,6 +221,7 @@ all_types = []
 cur = conn.cursor()
 sql_query = """
 SELECT type FROM images
+WHERE type IS NOT NULL
 GROUP BY type;
 """
 cur.execute(sql_query)
@@ -252,7 +258,8 @@ def changed_custom_type(*args):
 
 
 custom_type.trace_add("write", changed_custom_type)
-entry_custom_type = tkinter.Entry(db_upload, fg="red", textvariable=custom_type)
+entry_custom_type = tkinter.Entry(
+    db_upload, fg="red", textvariable=custom_type)
 # german category selection
 de_label_category = tkinter.Label(
     db_upload, text="Select a german category...:", fg="red")
@@ -284,6 +291,7 @@ de_all_categories = []
 cur = conn.cursor()
 sql_query = """
 SELECT de_category FROM images
+WHERE de_category IS NOT NULL
 GROUP BY de_category;
 """
 cur.execute(sql_query)
@@ -353,6 +361,7 @@ de_all_types = []
 cur = conn.cursor()
 sql_query = """
 SELECT de_type FROM images
+WHERE de_type IS NOT NULL
 GROUP BY de_type;
 """
 cur.execute(sql_query)
@@ -391,6 +400,76 @@ def de_changed_custom_type(*args):
 de_custom_type.trace_add("write", de_changed_custom_type)
 de_entry_custom_type = tkinter.Entry(
     db_upload, fg="red", textvariable=de_custom_type)
+# latin name selection
+latin_name_label = tkinter.Label(
+    db_upload, text="Select a latin name...:", fg="red")
+
+latin_name_selection = tkinter.Listbox(db_upload, fg="red", exportselection=0)
+
+
+def latin_listbox_changed(*args):
+    if latin_custom_name.get() != "":
+        custom_latin_name_entry.config(fg="green")
+        custom_latin_name_label.config(fg="green")
+        latin_name_selection.config(fg="red")
+        latin_name_label.config(fg="red")
+    elif not latin_name_selection.curselection():
+        custom_latin_name_entry.config(fg="red")
+        custom_latin_name_label.config(fg="red")
+        latin_name_selection.config(fg="red")
+        latin_name_label.config(fg="red")
+    else:
+        custom_latin_name_entry.config(fg="red")
+        custom_latin_name_label.config(fg="red")
+        latin_name_selection.config(fg="green")
+        latin_name_label.config(fg="green")
+
+
+latin_name_selection.bind('<<ListboxSelect>>', latin_listbox_changed)
+# gets data from sql database
+all_latin_names = []
+cur = conn.cursor()
+sql_query = """
+SELECT latin_name FROM images
+WHERE latin_name IS NOT NULL
+GROUP BY latin_name;
+"""
+cur.execute(sql_query)
+latin_name = cur.fetchone()
+while latin_name != None and latin_name[0] != None:
+    latin_name = "".join(latin_name)
+    all_latin_names.append(latin_name)
+    # adds the category to the selectionlist
+    latin_name_selection.insert(END, latin_name)
+    latin_name = cur.fetchone()
+# lets user add own option
+custom_latin_name_label = tkinter.Label(
+    db_upload, text="...or add a new one:", fg="red")
+latin_custom_name = StringVar()
+latin_custom_name.set("")
+
+
+def changed_custom_latin_name(*args):
+    if de_custom_type.get() != "":
+        latin_custom_name.config(fg="green")
+        custom_latin_name_label.config(fg="green")
+        latin_name_selection.config(fg="red")
+        latin_name_label.config(fg="red")
+    elif not latin_name_selection.curselection():
+        custom_latin_name_entry.config(fg="red")
+        custom_latin_name_label.config(fg="red")
+        latin_name_selection.config(fg="red")
+        latin_name_label.config(fg="red")
+    else:
+        custom_latin_name_entry.config(fg="red")
+        custom_latin_name_label.config(fg="red")
+        latin_name_selection.config(fg="green")
+        latin_name_label.config(fg="green")
+
+
+latin_custom_name.trace_add("write", changed_custom_latin_name)
+custom_latin_name_entry = tkinter.Entry(
+    db_upload, fg="red", textvariable=latin_custom_name)
 # add comment
 comment = StringVar()
 comment.set("")
@@ -401,7 +480,7 @@ entry_comment = tkinter.Entry(db_upload, textvariable=comment)
 
 
 def submit():
-    if bool(selected_images.get()) and bool(gallery_path.get()) and (bool(category_selection.curselection()) or bool(custom_category.get())) and (bool(type_selection.curselection() or bool(custom_type.get()))) and ((bool(de_category_selection.curselection()) or bool(de_custom_category.get())) and (bool(de_type_selection.curselection() or bool(de_custom_type.get())))):
+    if bool(selected_images.get()) and bool(gallery_path.get()) and (bool(category_selection.curselection()) or bool(custom_category.get())) and (bool(type_selection.curselection() or bool(custom_type.get()))) and ((bool(de_category_selection.curselection()) or bool(de_custom_category.get())) and (bool(de_type_selection.curselection() or bool(de_custom_type.get()))) and (bool(latin_name_selection.curselection() or bool(latin_custom_name.get())))):
         # uploads the full_img to the database
         db_name = uuid.uuid1()
         db_category = custom_category.get() if bool(custom_category.get(
@@ -431,14 +510,18 @@ def submit():
         db_thumbnail_height = str(thumbnail_result[2])
         db_de_category = str(db_de_category).replace(" ", "_")
         db_de_type = str(db_de_type).replace(" ", "_")
+        # latin name
+        db_latin_name = latin_custom_name.get() if bool(latin_custom_name.get(
+        )) else latin_name_selection.get(latin_name_selection.curselection())
+        db_latin_name =str(db_latin_name).replace(" ", "_") #so no errors in db
 
         sql_query = """
-        INSERT INTO images (name, category, type, comment, upload_date, width, height, size, thumbnail_size, thumbnail_width, thumbnail_height, de_category, de_type)
-        VALUES (%s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s);
+        INSERT INTO images (name, category, type, comment, upload_date, width, height, size, thumbnail_size, thumbnail_width, thumbnail_height, de_category, de_type, latin_name)
+        VALUES (%s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s);
         """
         cur = conn.cursor()
         cur.execute(sql_query, (db_name, db_category, db_type, db_comment, db_upload_date, db_width,
-                                db_height, db_size, db_thumbnail_size, db_thumbnail_width, db_thumbnail_height, db_de_category, db_de_type))
+                                db_height, db_size, db_thumbnail_size, db_thumbnail_width, db_thumbnail_height, db_de_category, db_de_type, db_latin_name))
         conn.commit()
         messagebox.showinfo(
             "Success!", "Image uploaded successfully. Please don't forget to also update GitHub!")
@@ -450,32 +533,40 @@ def submit():
 
 submit_button = tkinter.Button(db_upload, text="Submit", command=submit)
 # switch to upload function, switches to the upload selection when selection in menubar
+
+
 def switch_to_upload():
     # deletes ALL Frames
     db_delete.pack_forget()
     db_update.pack_forget()
     db_upload.pack_forget()
-    
+
     # makes only the upload frame
     db_upload.pack()
 # switch to upload function, switches to the upload selection when selection in menubar
+
+
 def switch_to_delete():
     # deletes ALL Frames
     db_delete.pack_forget()
     db_update.pack_forget()
     db_upload.pack_forget()
-    
+
     # makes only the delete frame
     db_delete.pack()
  # switch to upload function, switches to the upload selection when selection in menubar
+
+
 def switch_to_update():
     # deletes ALL Frames
     db_delete.pack_forget()
     db_update.pack_forget()
     db_upload.pack_forget()
-    
+
     # makes only the update frame
     db_update.pack()
+
+
 # Menubar
 menubar = tkinter.Menu(root)
 # Adds upload selection to menubar
@@ -517,11 +608,17 @@ de_type_selection.grid(row=9, column=1)
 
 de_label_custom_type.grid(row=10, column=1)
 de_entry_custom_type.grid(row=11, column=1)
+# select latin name
+latin_name_label.grid(row=12, column=0, columnspan=2)
+latin_name_selection.grid(row=13, column=0, columnspan=2)
+
+custom_latin_name_label.grid(row=14, column=0, columnspan=2)
+custom_latin_name_entry.grid(row=15, column=0, columnspan=2)
 # add comment
-label_comment.grid(row=12, column=0, columnspan=2)
-entry_comment.grid(row=13, column=0, columnspan=2)
+label_comment.grid(row=16, column=0, columnspan=2)
+entry_comment.grid(row=17, column=0, columnspan=2)
 # submit button
-submit_button.grid(row=14, column=0, columnspan=2)
+submit_button.grid(row=18, column=0, columnspan=2)
 # db_upload frame
 db_upload.pack()
 # window
