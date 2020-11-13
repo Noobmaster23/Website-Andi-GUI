@@ -75,6 +75,8 @@ root.title("Heebphotography.ch")
 root.wm_iconbitmap("favicon.ico")
 # frames
 db_upload = tkinter.Frame(root)
+db_update = tkinter.Frame(root)
+db_delete = tkinter.Frame(root)
 # connect to database
 password = simpledialog.askstring(
     title="Database Password", prompt="Password:")
@@ -447,11 +449,41 @@ def submit():
 
 
 submit_button = tkinter.Button(db_upload, text="Submit", command=submit)
+# switch to upload function, switches to the upload selection when selection in menubar
+def switch_to_upload():
+    # deletes ALL Frames
+    db_delete.pack_forget()
+    db_update.pack_forget()
+    db_upload.pack_forget()
+    
+    # makes only the upload frame
+    db_upload.pack()
+# switch to upload function, switches to the upload selection when selection in menubar
+def switch_to_delete():
+    # deletes ALL Frames
+    db_delete.pack_forget()
+    db_update.pack_forget()
+    db_upload.pack_forget()
+    
+    # makes only the delete frame
+    db_delete.pack()
+ # switch to upload function, switches to the upload selection when selection in menubar
+def switch_to_update():
+    # deletes ALL Frames
+    db_delete.pack_forget()
+    db_update.pack_forget()
+    db_upload.pack_forget()
+    
+    # makes only the update frame
+    db_update.pack()
 # Menubar
 menubar = tkinter.Menu(root)
-# Adds options menu and commands
-options = tkinter.Menu(menubar, tearoff=0)
-menubar.add_command(label="test", command=print("lol"))
+# Adds upload selection to menubar
+menubar.add_command(label="Upload", command=switch_to_upload)
+# Adds delete selection to menubar
+menubar.add_command(label="Delete", command=switch_to_delete)
+# Adds update selection to menubar
+menubar.add_command(label="Update", command=switch_to_update)
 # makes the window
 # select image
 label_select_image.grid(row=0, column=0)
