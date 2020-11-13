@@ -4,6 +4,7 @@ from tkinter import StringVar, filedialog
 from tkinter import simpledialog
 from tkinter.constants import END
 from tkinter import messagebox
+from tkinter import ttk
 
 import os
 
@@ -513,15 +514,16 @@ def submit():
         # latin name
         db_latin_name = latin_custom_name.get() if bool(latin_custom_name.get(
         )) else latin_name_selection.get(latin_name_selection.curselection())
-        db_latin_name =str(db_latin_name).replace(" ", "_") #so no errors in db
+        db_latin_name = str(db_latin_name).replace(
+            " ", "_")  # so no errors in db
 
         sql_query = """
         INSERT INTO images (name, category, type, comment, upload_date, width, height, size, thumbnail_size, thumbnail_width, thumbnail_height, de_category, de_type, latin_name)
-        VALUES (%s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s);
+        VALUES (%s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s);
         """
         cur = conn.cursor()
         cur.execute(sql_query, (db_name, db_category, db_type, db_comment, db_upload_date, db_width,
-                                db_height, db_size, db_thumbnail_size, db_thumbnail_width, db_thumbnail_height, db_de_category, db_de_type, db_latin_name))
+                                db_height, db_size, db_thumbnail_size, db_thumbnail_width, db_thumbnail_height, db_de_category, db_de_type, db_latin_name, db_upload_date))
         conn.commit()
         messagebox.showinfo(
             "Success!", "Image uploaded successfully. Please don't forget to also update GitHub!")
@@ -531,7 +533,254 @@ def submit():
                              "Not everything is filled out!")
 
 
-submit_button = tkinter.Button(db_upload, text="Submit", command=submit)
+submit_button = tkinter.Button(db_upload, text="Upload", command=submit)
+# update things in the database
+# make variables
+update_name_selection_value = tkinter.StringVar()
+update_de_category_selection_value = tkinter.StringVar()
+update_de_type_selection_value = tkinter.StringVar()
+update_category_selection_value = tkinter.StringVar()
+update_type_selection_value = tkinter.StringVar()
+update_latin_name_selection_value = tkinter.StringVar()
+# gets all image names
+cur = conn.cursor()
+sql_query = """
+SELECT name FROM images
+WHERE name IS NOT NULL
+GROUP BY name;
+"""
+cur.execute(sql_query)
+name = cur.fetchone()
+all_names = []
+while name != None and name[0] != None:
+    name = "".join(name)
+    all_names.append(name)
+    name = cur.fetchone()
+# make the label for combox
+update_name_label = tkinter.Label(db_update, text="Select a image to update:")
+# makes combox
+update_name_selection = ttk.Combobox(
+    db_update, textvariable=update_name_selection_value, values=all_names, width=40)
+# inserts the values if the combox value changes
+
+
+def update_name_selection_value_changed(*args):
+    # changes the other values to the values in the database
+    cur = conn.cursor()
+    sql_query = """
+    SELECT de_category FROM images
+    WHERE name = '{0}'
+    GROUP BY de_category;
+    """.format(update_name_selection_value.get())
+    cur.execute(sql_query)
+    temp_sql_value = "".join(cur.fetchone())
+    update_de_category_selection_value.set(temp_sql_value)
+
+    cur = conn.cursor()
+    sql_query = """
+    SELECT de_type FROM images
+    WHERE name = '{0}'
+    GROUP BY de_type;
+    """.format(update_name_selection_value.get())
+    cur.execute(sql_query)
+    temp_sql_value = "".join(cur.fetchone())
+    update_de_type_selection_value.set(temp_sql_value)
+
+    cur = conn.cursor()
+    sql_query = """
+    SELECT category FROM images
+    WHERE name = '{0}'
+    GROUP BY category;
+    """.format(update_name_selection_value.get())
+    cur.execute(sql_query)
+    temp_sql_value = "".join(cur.fetchone())
+    update_category_selection_value.set(temp_sql_value)
+
+    cur = conn.cursor()
+    sql_query = """
+    SELECT type FROM images
+    WHERE name = '{0}'
+    GROUP BY type;
+    """.format(update_name_selection_value.get())
+    cur.execute(sql_query)
+    temp_sql_value = "".join(cur.fetchone())
+    update_type_selection_value.set(temp_sql_value)
+
+    cur = conn.cursor()
+    sql_query = """
+    SELECT latin_name FROM images
+    WHERE name = '{0}'
+    GROUP BY latin_name;
+    """.format(update_name_selection_value.get())
+    cur.execute(sql_query)
+    temp_sql_value = "".join(cur.fetchone())
+    update_latin_name_selection_value.set(temp_sql_value)
+
+
+update_name_selection_value.trace_add(
+    "write", update_name_selection_value_changed)
+# changeable de category
+update_de_category_label = tkinter.Label(
+    db_update, text="Select a german category or make a new one:")
+# combox
+# gets all de categories
+cur = conn.cursor()
+sql_query = """
+SELECT de_category FROM images
+WHERE de_category IS NOT NULL
+GROUP BY de_category
+ORDER BY de_category;
+"""
+cur.execute(sql_query)
+de_category = cur.fetchone()
+all_de_categories = []
+while de_category != None and de_category[0] != None:
+    de_category = "".join(de_category)
+    all_de_categories.append(de_category)
+    de_category = cur.fetchone()
+update_de_category_selection = ttk.Combobox(
+    db_update, textvariable=update_de_category_selection_value, values=all_de_categories)
+# changeable de type
+update_de_type_label = tkinter.Label(
+    db_update, text="Select a german type or make a new one:")
+# combox
+# gets all de categories
+cur = conn.cursor()
+sql_query = """
+SELECT de_type FROM images
+WHERE de_type IS NOT NULL
+GROUP BY de_type
+ORDER BY de_type;
+"""
+cur.execute(sql_query)
+de_type = cur.fetchone()
+all_de_types = []
+while de_type != None and de_type[0] != None:
+    de_type = "".join(de_type)
+    all_de_types.append(de_type)
+    de_type = cur.fetchone()
+update_de_type_selection = ttk.Combobox(
+    db_update, textvariable=update_de_type_selection_value, values=all_de_types)
+# changeable category
+update_category_label = tkinter.Label(
+    db_update, text="Select a category or make a new one:")
+# combox
+# gets all de categories
+cur = conn.cursor()
+sql_query = """
+SELECT category FROM images
+WHERE category IS NOT NULL
+GROUP BY category
+ORDER BY category;
+"""
+cur.execute(sql_query)
+category = cur.fetchone()
+all_categories = []
+while category != None and category[0] != None:
+    category = "".join(category)
+    all_categories.append(category)
+    category = cur.fetchone()
+update_category_selection = ttk.Combobox(
+    db_update, textvariable=update_category_selection_value, values=all_categories)
+# changeable type
+update_type_label = tkinter.Label(
+    db_update, text="Select a type or make a new one:")
+# combox
+# gets all de categories
+cur = conn.cursor()
+sql_query = """
+SELECT type FROM images
+WHERE type IS NOT NULL
+GROUP BY type
+ORDER BY type;
+"""
+cur.execute(sql_query)
+type_ = cur.fetchone()
+all_types = []
+while type_ != None and type_[0] != None:
+    type_ = "".join(type_)
+    all_types.append(type_)
+    type_ = cur.fetchone()
+update_type_selection = ttk.Combobox(
+    db_update, textvariable=update_type_selection_value, values=all_types)
+# changeable latin name
+update_latin_name_label = tkinter.Label(
+    db_update, text="Select a latin name or make a new one:")
+# combox
+# gets all de categories
+cur = conn.cursor()
+sql_query = """
+SELECT latin_name FROM images
+WHERE latin_name IS NOT NULL
+GROUP BY latin_name
+ORDER BY latin_name;
+"""
+cur.execute(sql_query)
+latin_name = cur.fetchone()
+all_latin_names = []
+while latin_name != None and latin_name[0] != None:
+    latin_name = "".join(latin_name)
+    all_latin_names.append(latin_name)
+    latin_name = cur.fetchone()
+update_latin_name_selection = ttk.Combobox(
+    db_update, textvariable=update_latin_name_selection_value, values=all_latin_names)
+# update database (button + function)
+
+
+def update_db():
+    db_update_name = update_name_selection_value.get()
+    db_update_name = db_update_name.replace(" ", "_")
+
+    db_update_de_category = update_de_category_selection_value.get()
+    db_update_de_category = db_update_de_category.replace(" ", "_")
+
+    db_update_de_type = update_de_type_selection_value.get()
+    db_update_de_type = db_update_de_type.replace(" ", "_")
+
+    db_update_category = update_category_selection_value.get()
+    db_update_category = db_update_category.replace(" ", "_")
+
+    db_update_type = update_type_selection_value.get()
+    db_update_type = db_update_type.replace(" ", "_")
+
+    db_update_latin_name = update_latin_name_selection_value.get()
+    db_update_latin_name = db_update_latin_name.replace(" ", "_")
+
+    db_update_last_changed = datetime.datetime.now()
+    db_update_last_changed = str(db_update_last_changed)
+
+    cur = conn.cursor()
+
+    sql_query = "UPDATE images SET category = '{0}', type = '{1}', de_category = '{2}', de_type = '{3}', latin_name = '{4}', last_changed = '{5}' WHERE name = '{6}';".format(db_update_category, db_update_type, db_update_de_category, db_update_de_type, db_update_latin_name, db_update_last_changed, db_update_name)
+    cur.execute(sql_query)
+    conn.commit()
+    cur.close()
+
+    messagebox.showinfo(
+        "Success!", "Image update successfull.")
+
+
+update_button = tkinter.Button(db_update, text="Update", command=update_db)
+# add all thing to the update frame
+update_name_label.grid(row=0, column=0)
+update_name_selection.grid(row=1, column=0)
+
+update_de_category_label.grid(row=2, column=0)
+update_de_category_selection.grid(row=3, column=0)
+
+update_de_type_label.grid(row=4, column=0)
+update_de_type_selection.grid(row=5, column=0)
+
+update_category_label.grid(row=6, column=0)
+update_category_selection.grid(row=7, column=0)
+
+update_type_label.grid(row=8, column=0)
+update_type_selection.grid(row=9, column=0)
+
+update_latin_name_label.grid(row=10, column=0)
+update_latin_name_selection.grid(row=11, column=0)
+
+update_button.grid(row=12, column=0)
 # switch to upload function, switches to the upload selection when selection in menubar
 
 
@@ -571,10 +820,10 @@ def switch_to_update():
 menubar = tkinter.Menu(root)
 # Adds upload selection to menubar
 menubar.add_command(label="Upload", command=switch_to_upload)
-# Adds delete selection to menubar
-menubar.add_command(label="Delete", command=switch_to_delete)
 # Adds update selection to menubar
 menubar.add_command(label="Update", command=switch_to_update)
+# Adds delete selection to menubar
+menubar.add_command(label="Delete", command=switch_to_delete)
 # makes the window
 # select image
 label_select_image.grid(row=0, column=0)
