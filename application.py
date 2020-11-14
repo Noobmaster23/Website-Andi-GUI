@@ -1,10 +1,11 @@
 # importing stuff
 import tkinter
-from tkinter import StringVar, filedialog
+from tkinter import Label, StringVar, filedialog
 from tkinter import simpledialog
 from tkinter.constants import END
 from tkinter import messagebox
 from tkinter import ttk
+from io import BytesIO
 
 import os
 
@@ -24,11 +25,18 @@ except ImportError:
     os.system('python -m pip install psycopg2-binary')
 import psycopg2
 
+try:
+    import requests
+except ImportError:
+    print("Trying to Install requiroped module: psycopg2\n")
+    os.system('python -m pip install requests')
+import psycopg2
+
 import uuid
 
 import datetime
 
-from PIL import Image, ImageDraw, ImageFont, ImageEnhance
+from PIL import Image, ImageDraw, ImageFont, ImageEnhance, ImageTk
 # image editing
 
 
@@ -452,7 +460,7 @@ latin_custom_name.set("")
 
 def changed_custom_latin_name(*args):
     if de_custom_type.get() != "":
-        latin_custom_name.config(fg="green")
+        custom_latin_name_entry.config(fg="green")
         custom_latin_name_label.config(fg="green")
         latin_name_selection.config(fg="red")
         latin_name_label.config(fg="red")
@@ -518,7 +526,7 @@ def submit():
             " ", "_")  # so no errors in db
 
         sql_query = """
-        INSERT INTO images (name, category, type, comment, upload_date, width, height, size, thumbnail_size, thumbnail_width, thumbnail_height, de_category, de_type, latin_name)
+        INSERT INTO images (name, category, type, comment, upload_date, width, height, size, thumbnail_size, thumbnail_width, thumbnail_height, de_category, de_type, latin_name, last_changed)
         VALUES (%s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s);
         """
         cur = conn.cursor()
@@ -557,7 +565,7 @@ while name != None and name[0] != None:
     all_names.append(name)
     name = cur.fetchone()
 # make the label for combox
-update_name_label = tkinter.Label(db_update, text="Select a image to update:")
+update_name_label = tkinter.Label(db_update, text="Select an image to update:")
 # makes combox
 update_name_selection = ttk.Combobox(
     db_update, textvariable=update_name_selection_value, values=all_names, width=40)
@@ -751,7 +759,8 @@ def update_db():
 
     cur = conn.cursor()
 
-    sql_query = "UPDATE images SET category = '{0}', type = '{1}', de_category = '{2}', de_type = '{3}', latin_name = '{4}', last_changed = '{5}' WHERE name = '{6}';".format(db_update_category, db_update_type, db_update_de_category, db_update_de_type, db_update_latin_name, db_update_last_changed, db_update_name)
+    sql_query = "UPDATE images SET category = '{0}', type = '{1}', de_category = '{2}', de_type = '{3}', latin_name = '{4}', last_changed = '{5}' WHERE name = '{6}';".format(
+        db_update_category, db_update_type, db_update_de_category, db_update_de_type, db_update_latin_name, db_update_last_changed, db_update_name)
     cur.execute(sql_query)
     conn.commit()
     cur.close()
@@ -781,6 +790,58 @@ update_latin_name_label.grid(row=10, column=0)
 update_latin_name_selection.grid(row=11, column=0)
 
 update_button.grid(row=12, column=0)
+# delete page
+# variables
+db_delete_name_selection_value = tkinter.StringVar()
+# select name
+cur = conn.cursor()
+sql_query = "SELECT DISTINCT name FROM images;"
+cur.execute(sql_query)
+name = cur.fetchone()
+all_names = []
+while name != None and name[0] != None:
+    name = "".join(name)
+    all_names.append(name)
+    name = cur.fetchone()
+
+db_delete_name_label = tkinter.Label(
+    db_delete, text="Select an image to delete:")
+db_delete_name_selection = ttk.Combobox(
+    db_delete, textvariable=db_delete_name_selection_value, values=all_names, width=40)
+# on combobox value change, load the image
+# image
+db_delete_image = tkinter.Label(db_delete)
+
+
+def db_delete_name_selection_value_change(*args):
+    global render
+    url = "https://heebphotography.ch/public/images/gallery/thumbnail/" + \
+        db_delete_name_selection_value.get() + ".jpg"
+    response = requests.get(url)
+    img = Image.open(BytesIO(response.content))
+    # img.show()
+    render = ImageTk.PhotoImage(img)
+
+    db_delete_image.config(image=render)
+
+
+db_delete_name_selection_value.trace_add(
+    'write', db_delete_name_selection_value_change)
+# delete button
+def delete_image(*args):
+    if messagebox.askokcancel("DELETING IMAGE!", "Do you really want to delete this image? This can't be undone!"):
+        cur = conn.cursor()
+        sql_query = "DELETE FROM images WHERE name = '{0}';".format(db_delete_name_selection_value.get())
+        cur.execute(sql_query)
+        conn.commit()
+        cur.close()
+
+db_delete_button = tkinter.Button(db_delete, text="DELETE", command=delete_image)
+# insert everything
+db_delete_name_label.grid(row=0, column=0)
+db_delete_name_selection.grid(row=1, column=0)
+db_delete_image.grid(row=3, column=0)
+db_delete_button.grid(row=4, column=0)
 # switch to upload function, switches to the upload selection when selection in menubar
 
 
