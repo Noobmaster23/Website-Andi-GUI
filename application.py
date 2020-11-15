@@ -28,7 +28,7 @@ import psycopg2
 try:
     import requests
 except ImportError:
-    print("Trying to Install requiroped module: psycopg2\n")
+    print("Trying to Install requiroped module: requests\n")
     os.system('python -m pip install requests')
 import psycopg2
 
