@@ -621,7 +621,10 @@ def update_name_selection_value_changed(*args):
     GROUP BY latin_name;
     """.format(update_name_selection_value.get())
     cur.execute(sql_query)
-    temp_sql_value = "".join(cur.fetchone())
+    try:
+        temp_sql_value = "".join(cur.fetchone())
+    except TypeError:
+        temp_sql_value = ""
     update_latin_name_selection_value.set(temp_sql_value)
 
 
@@ -819,6 +822,10 @@ def db_delete_name_selection_value_change(*args):
         db_delete_name_selection_value.get() + ".jpg"
     response = requests.get(url)
     img = Image.open(BytesIO(response.content))
+    basewidth = 300
+    wpercent = (basewidth/float(img.size[0]))
+    hsize = int((float(img.size[1])*float(wpercent)))
+    img = img.resize((basewidth, hsize), Image.ANTIALIAS)
     # img.show()
     render = ImageTk.PhotoImage(img)
 
@@ -828,15 +835,20 @@ def db_delete_name_selection_value_change(*args):
 db_delete_name_selection_value.trace_add(
     'write', db_delete_name_selection_value_change)
 # delete button
+
+
 def delete_image(*args):
     if messagebox.askokcancel("DELETING IMAGE!", "Do you really want to delete this image? This can't be undone!"):
         cur = conn.cursor()
-        sql_query = "DELETE FROM images WHERE name = '{0}';".format(db_delete_name_selection_value.get())
+        sql_query = "DELETE FROM images WHERE name = '{0}';".format(
+            db_delete_name_selection_value.get())
         cur.execute(sql_query)
         conn.commit()
         cur.close()
 
-db_delete_button = tkinter.Button(db_delete, text="DELETE", command=delete_image)
+
+db_delete_button = tkinter.Button(
+    db_delete, text="DELETE", command=delete_image)
 # insert everything
 db_delete_name_label.grid(row=0, column=0)
 db_delete_name_selection.grid(row=1, column=0)
