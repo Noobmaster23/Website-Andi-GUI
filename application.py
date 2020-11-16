@@ -896,30 +896,36 @@ button_gallery_path.grid(row=2, column=1)
 path_to_gallery.grid(row=3, column=0, columnspan=2)
 # select category
 label_category.grid(row=4, column=0)
+selection_height = 4
+category_selection.configure(height=selection_height)
 category_selection.grid(row=5, column=0)
 
 label_custom_category.grid(row=6, column=0)
 entry_custom_category.grid(row=7, column=0)
 # select german category
 de_label_category.grid(row=4, column=1)
+de_category_selection.configure(height=selection_height)
 de_category_selection.grid(row=5, column=1)
 
 de_label_custom_category.grid(row=6, column=1)
 de_entry_custom_category.grid(row=7, column=1)
 # select type
 label_type.grid(row=8, column=0)
+type_selection.configure(height=selection_height)
 type_selection.grid(row=9, column=0)
 
 label_custom_type.grid(row=10, column=0)
 entry_custom_type.grid(row=11, column=0)
 # select german type
 de_label_type.grid(row=8, column=1)
+de_type_selection.configure(height=selection_height)
 de_type_selection.grid(row=9, column=1)
 
 de_label_custom_type.grid(row=10, column=1)
 de_entry_custom_type.grid(row=11, column=1)
 # select latin name
 latin_name_label.grid(row=12, column=0, columnspan=2)
+latin_name_selection.configure(height=selection_height)
 latin_name_selection.grid(row=13, column=0, columnspan=2)
 
 custom_latin_name_label.grid(row=14, column=0, columnspan=2)
