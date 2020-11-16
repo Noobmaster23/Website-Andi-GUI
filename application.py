@@ -87,6 +87,50 @@ root.wm_iconbitmap("favicon.ico")
 db_upload = tkinter.Frame(root)
 db_update = tkinter.Frame(root)
 db_delete = tkinter.Frame(root)
+# canvas
+db_delete_canvas = tkinter.Canvas(db_delete)
+db_update_canvas = tkinter.Canvas(db_update)
+db_upload_canvas = tkinter.Canvas(db_upload)
+# scrollbars
+db_delete_canvas_scrollbar = tkinter.Scrollbar(
+    db_delete, orient="vertical", command=db_delete_canvas.yview)
+db_update_canvas_scrollbar = tkinter.Scrollbar(
+    db_update, orient="vertical", command=db_update_canvas.yview)
+db_upload_canvas_scrollbar = tkinter.Scrollbar(
+    db_upload, orient="vertical", command=db_upload_canvas.yview)
+# scrollable frames
+scrollable_db_upload = tkinter.Frame(db_upload_canvas)
+scrollable_db_update = tkinter.Frame(db_update_canvas)
+scrollable_db_delete = tkinter.Frame(db_delete_canvas)
+
+scrollable_db_upload.bind(
+    "<Configure>",
+    lambda e: db_upload_canvas.configure(
+        scrollregion=db_upload_canvas.bbox("all"))
+)
+
+scrollable_db_update.bind(
+    "<Configure>",
+    lambda e: db_update_canvas.configure(
+        scrollregion=db_update_canvas.bbox("all"))
+)
+
+scrollable_db_delete.bind(
+    "<Configure>",
+    lambda e: db_delete_canvas.configure(
+        scrollregion=db_delete_canvas.bbox("all"))
+)
+
+db_update_canvas.create_window(
+    (0, 0), window=scrollable_db_update, anchor="nw")
+db_delete_canvas.create_window(
+    (0, 0), window=scrollable_db_delete, anchor="nw")
+db_upload_canvas.create_window(
+    (0, 0), window=scrollable_db_upload, anchor="nw")
+
+db_update_canvas.configure(yscrollcommand=db_update_canvas_scrollbar.set)
+db_delete_canvas.configure(yscrollcommand=db_delete_canvas_scrollbar.set)
+db_upload_canvas.configure(yscrollcommand=db_upload_canvas_scrollbar.set)
 # connect to database
 password = simpledialog.askstring(
     title="Database Password", prompt="Password:")
@@ -96,9 +140,10 @@ conn = psycopg2.connect(host="heebphotography.ch", port="5500",
 # select image
 selected_images = tkinter.StringVar()
 
-label_select_image = tkinter.Label(db_upload, text="Select Image:", fg="red")
+label_select_image = tkinter.Label(
+    db_upload_canvas, text="Select Image:", fg="red")
 path_to_image = tkinter.Label(
-    db_upload, textvariable=selected_images, fg="green")
+    db_upload_canvas, textvariable=selected_images, fg="green")
 
 
 def save_image_path():
@@ -106,18 +151,18 @@ def save_image_path():
         title="Select the image", filetypes=(("jpeg files", "*.jpg"), ("all files", "*.*"))))
     button_select_image.config(fg="black")
     label_select_image.config(fg="black")
-    db_upload.update()
+    db_upload_canvas.update()
 
 
 button_select_image = tkinter.Button(
-    db_upload, text="Select Image", command=save_image_path, fg="red")
+    db_upload_canvas, text="Select Image", command=save_image_path, fg="red")
 # path to gallery
 gallery_path = tkinter.StringVar()
 
 label_gallery_path = tkinter.Label(
-    db_upload, text="Select the path to the gallery folder:", fg="red")
+    db_upload_canvas, text="Select the path to the gallery folder:", fg="red")
 path_to_gallery = tkinter.Label(
-    db_upload, textvariable=gallery_path, fg="green")
+    db_upload_canvas, textvariable=gallery_path, fg="green")
 
 
 def select_gallery_path():
@@ -125,16 +170,17 @@ def select_gallery_path():
     gallery_path.set(filedialog.askdirectory())
     label_gallery_path.config(fg="black")
     button_gallery_path.config(fg="black")
-    db_upload.update()
+    db_upload_canvas.update()
 
 
 button_gallery_path = tkinter.Button(
-    db_upload, text="Select Path", command=select_gallery_path, fg="red")
+    db_upload_canvas, text="Select Path", command=select_gallery_path, fg="red")
 # category selection
 label_category = tkinter.Label(
-    db_upload, text="Select a category...:", fg="red")
+    db_upload_canvas, text="Select a category...:", fg="red")
 
-category_selection = tkinter.Listbox(db_upload, fg="red", exportselection=0)
+category_selection = tkinter.Listbox(
+    db_upload_canvas, fg="red", exportselection=0)
 
 
 def category_listbox_changed(*args):
@@ -174,7 +220,7 @@ while category != None and category[0] != None:
     category = cur.fetchone()
 # lets user add own option
 label_custom_category = tkinter.Label(
-    db_upload, text="...or add a new one:", fg="red")
+    db_upload_canvas, text="...or add a new one:", fg="red")
 custom_category = StringVar()
 custom_category.set("")
 
@@ -199,11 +245,12 @@ def changed_custom_category(*args):
 
 custom_category.trace_add("write", changed_custom_category)
 entry_custom_category = tkinter.Entry(
-    db_upload, fg="red", textvariable=custom_category)
+    db_upload_canvas, fg="red", textvariable=custom_category)
 # type selection
-label_type = tkinter.Label(db_upload, text="Select a type...:", fg="red")
+label_type = tkinter.Label(
+    db_upload_canvas, text="Select a type...:", fg="red")
 
-type_selection = tkinter.Listbox(db_upload, fg="red", exportselection=0)
+type_selection = tkinter.Listbox(db_upload_canvas, fg="red", exportselection=0)
 
 
 def type_listbox_changed(*args):
@@ -243,7 +290,7 @@ while type_ != None and type_[0] != None:
     type_ = cur.fetchone()
 # lets user add own option
 label_custom_type = tkinter.Label(
-    db_upload, text="...or add a new one:", fg="red")
+    db_upload_canvas, text="...or add a new one:", fg="red")
 custom_type = StringVar()
 custom_type.set("")
 
@@ -268,12 +315,13 @@ def changed_custom_type(*args):
 
 custom_type.trace_add("write", changed_custom_type)
 entry_custom_type = tkinter.Entry(
-    db_upload, fg="red", textvariable=custom_type)
+    db_upload_canvas, fg="red", textvariable=custom_type)
 # german category selection
 de_label_category = tkinter.Label(
-    db_upload, text="Select a german category...:", fg="red")
+    db_upload_canvas, text="Select a german category...:", fg="red")
 
-de_category_selection = tkinter.Listbox(db_upload, fg="red", exportselection=0)
+de_category_selection = tkinter.Listbox(
+    db_upload_canvas, fg="red", exportselection=0)
 
 
 def de_category_listbox_changed(*args):
@@ -313,7 +361,7 @@ while de_category != None and de_category[0] != None:
     de_category = cur.fetchone()
 # lets user add own option
 de_label_custom_category = tkinter.Label(
-    db_upload, text="...or add a new one:", fg="red")
+    db_upload_canvas, text="...or add a new one:", fg="red")
 de_custom_category = StringVar()
 de_custom_category.set("")
 
@@ -338,12 +386,13 @@ def de_changed_custom_category(*args):
 
 de_custom_category.trace_add("write", de_changed_custom_category)
 de_entry_custom_category = tkinter.Entry(
-    db_upload, fg="red", textvariable=de_custom_category)
+    db_upload_canvas, fg="red", textvariable=de_custom_category)
 # german type selection
 de_label_type = tkinter.Label(
-    db_upload, text="Select a german type...:", fg="red")
+    db_upload_canvas, text="Select a german type...:", fg="red")
 
-de_type_selection = tkinter.Listbox(db_upload, fg="red", exportselection=0)
+de_type_selection = tkinter.Listbox(
+    db_upload_canvas, fg="red", exportselection=0)
 
 
 def de_type_listbox_changed(*args):
@@ -383,7 +432,7 @@ while de_type != None and de_type[0] != None:
     de_type = cur.fetchone()
 # lets user add own option
 de_label_custom_type = tkinter.Label(
-    db_upload, text="...or add a new one:", fg="red")
+    db_upload_canvas, text="...or add a new one:", fg="red")
 de_custom_type = StringVar()
 de_custom_type.set("")
 
@@ -408,12 +457,13 @@ def de_changed_custom_type(*args):
 
 de_custom_type.trace_add("write", de_changed_custom_type)
 de_entry_custom_type = tkinter.Entry(
-    db_upload, fg="red", textvariable=de_custom_type)
+    db_upload_canvas, fg="red", textvariable=de_custom_type)
 # latin name selection
 latin_name_label = tkinter.Label(
-    db_upload, text="Select a latin name...:", fg="red")
+    db_upload_canvas, text="Select a latin name...:", fg="red")
 
-latin_name_selection = tkinter.Listbox(db_upload, fg="red", exportselection=0)
+latin_name_selection = tkinter.Listbox(
+    db_upload_canvas, fg="red", exportselection=0)
 
 
 def latin_listbox_changed(*args):
@@ -453,7 +503,7 @@ while latin_name != None and latin_name[0] != None:
     latin_name = cur.fetchone()
 # lets user add own option
 custom_latin_name_label = tkinter.Label(
-    db_upload, text="...or add a new one:", fg="red")
+    db_upload_canvas, text="...or add a new one:", fg="red")
 latin_custom_name = StringVar()
 latin_custom_name.set("")
 
@@ -478,13 +528,14 @@ def changed_custom_latin_name(*args):
 
 latin_custom_name.trace_add("write", changed_custom_latin_name)
 custom_latin_name_entry = tkinter.Entry(
-    db_upload, fg="red", textvariable=latin_custom_name)
+    db_upload_canvas, fg="red", textvariable=latin_custom_name)
 # add comment
 comment = StringVar()
 comment.set("")
-label_comment = tkinter.Label(db_upload, text="Add an additional comment:")
+label_comment = tkinter.Label(
+    db_upload_canvas, text="Add an additional comment:")
 
-entry_comment = tkinter.Entry(db_upload, textvariable=comment)
+entry_comment = tkinter.Entry(db_upload_canvas, textvariable=comment)
 # submit button
 
 
@@ -541,7 +592,7 @@ def submit():
                              "Not everything is filled out!")
 
 
-submit_button = tkinter.Button(db_upload, text="Upload", command=submit)
+submit_button = tkinter.Button(db_upload_canvas, text="Upload", command=submit)
 # update things in the database
 # make variables
 update_name_selection_value = tkinter.StringVar()
@@ -565,10 +616,11 @@ while name != None and name[0] != None:
     all_names.append(name)
     name = cur.fetchone()
 # make the label for combox
-update_name_label = tkinter.Label(db_update, text="Select an image to update:")
+update_name_label = tkinter.Label(
+    db_update_canvas, text="Select an image to update:")
 # makes combox
 update_name_selection = ttk.Combobox(
-    db_update, textvariable=update_name_selection_value, values=all_names, width=40)
+    db_update_canvas, textvariable=update_name_selection_value, values=all_names, width=40)
 # inserts the values if the combox value changes
 
 
@@ -629,7 +681,7 @@ update_name_selection_value.trace_add(
     "write", update_name_selection_value_changed)
 # changeable de category
 update_de_category_label = tkinter.Label(
-    db_update, text="Select a german category or make a new one:")
+    db_update_canvas, text="Select a german category or make a new one:")
 # combox
 # gets all de categories
 cur = conn.cursor()
@@ -647,10 +699,10 @@ while de_category != None and de_category[0] != None:
     all_de_categories.append(de_category)
     de_category = cur.fetchone()
 update_de_category_selection = ttk.Combobox(
-    db_update, textvariable=update_de_category_selection_value, values=all_de_categories)
+    db_update_canvas, textvariable=update_de_category_selection_value, values=all_de_categories)
 # changeable de type
 update_de_type_label = tkinter.Label(
-    db_update, text="Select a german type or make a new one:")
+    db_update_canvas, text="Select a german type or make a new one:")
 # combox
 # gets all de categories
 cur = conn.cursor()
@@ -668,10 +720,10 @@ while de_type != None and de_type[0] != None:
     all_de_types.append(de_type)
     de_type = cur.fetchone()
 update_de_type_selection = ttk.Combobox(
-    db_update, textvariable=update_de_type_selection_value, values=all_de_types)
+    db_update_canvas, textvariable=update_de_type_selection_value, values=all_de_types)
 # changeable category
 update_category_label = tkinter.Label(
-    db_update, text="Select a category or make a new one:")
+    db_update_canvas, text="Select a category or make a new one:")
 # combox
 # gets all de categories
 cur = conn.cursor()
@@ -689,10 +741,10 @@ while category != None and category[0] != None:
     all_categories.append(category)
     category = cur.fetchone()
 update_category_selection = ttk.Combobox(
-    db_update, textvariable=update_category_selection_value, values=all_categories)
+    db_update_canvas, textvariable=update_category_selection_value, values=all_categories)
 # changeable type
 update_type_label = tkinter.Label(
-    db_update, text="Select a type or make a new one:")
+    db_update_canvas, text="Select a type or make a new one:")
 # combox
 # gets all de categories
 cur = conn.cursor()
@@ -710,10 +762,10 @@ while type_ != None and type_[0] != None:
     all_types.append(type_)
     type_ = cur.fetchone()
 update_type_selection = ttk.Combobox(
-    db_update, textvariable=update_type_selection_value, values=all_types)
+    db_update_canvas, textvariable=update_type_selection_value, values=all_types)
 # changeable latin name
 update_latin_name_label = tkinter.Label(
-    db_update, text="Select a latin name or make a new one:")
+    db_update_canvas, text="Select a latin name or make a new one:")
 # combox
 # gets all de categories
 cur = conn.cursor()
@@ -731,7 +783,7 @@ while latin_name != None and latin_name[0] != None:
     all_latin_names.append(latin_name)
     latin_name = cur.fetchone()
 update_latin_name_selection = ttk.Combobox(
-    db_update, textvariable=update_latin_name_selection_value, values=all_latin_names)
+    db_update_canvas, textvariable=update_latin_name_selection_value, values=all_latin_names)
 # update database (button + function)
 
 
@@ -769,7 +821,8 @@ def update_db():
         "Success!", "Image update successfull.")
 
 
-update_button = tkinter.Button(db_update, text="Update", command=update_db)
+update_button = tkinter.Button(
+    db_update_canvas, text="Update", command=update_db)
 # add all thing to the update frame
 update_name_label.grid(row=0, column=0)
 update_name_selection.grid(row=1, column=0)
@@ -805,12 +858,12 @@ while name != None and name[0] != None:
     name = cur.fetchone()
 
 db_delete_name_label = tkinter.Label(
-    db_delete, text="Select an image to delete:")
+    db_delete_canvas, text="Select an image to delete:")
 db_delete_name_selection = ttk.Combobox(
-    db_delete, textvariable=db_delete_name_selection_value, values=all_names, width=40)
+    db_delete_canvas, textvariable=db_delete_name_selection_value, values=all_names, width=40)
 # on combobox value change, load the image
 # image
-db_delete_image = tkinter.Label(db_delete)
+db_delete_image = tkinter.Label(db_delete_canvas)
 
 
 def db_delete_name_selection_value_change(*args):
@@ -828,15 +881,20 @@ def db_delete_name_selection_value_change(*args):
 db_delete_name_selection_value.trace_add(
     'write', db_delete_name_selection_value_change)
 # delete button
+
+
 def delete_image(*args):
     if messagebox.askokcancel("DELETING IMAGE!", "Do you really want to delete this image? This can't be undone!"):
         cur = conn.cursor()
-        sql_query = "DELETE FROM images WHERE name = '{0}';".format(db_delete_name_selection_value.get())
+        sql_query = "DELETE FROM images WHERE name = '{0}';".format(
+            db_delete_name_selection_value.get())
         cur.execute(sql_query)
         conn.commit()
         cur.close()
 
-db_delete_button = tkinter.Button(db_delete, text="DELETE", command=delete_image)
+
+db_delete_button = tkinter.Button(
+    db_delete_canvas, text="DELETE", command=delete_image)
 # insert everything
 db_delete_name_label.grid(row=0, column=0)
 db_delete_name_selection.grid(row=1, column=0)
@@ -847,34 +905,40 @@ db_delete_button.grid(row=4, column=0)
 
 def switch_to_upload():
     # deletes ALL Frames
-    db_delete.pack_forget()
-    db_update.pack_forget()
-    db_upload.pack_forget()
+    db_delete_canvas.pack_forget()
+    db_update_canvas.pack_forget()
+    db_upload_canvas.pack_forget()
 
     # makes only the upload frame
-    db_upload.pack()
+    db_upload_canvas.pack(side="left", fill="both", expand=True)
+    # scrollbars
+    db_upload_canvas_scrollbar.pack(side="right", fill="y")
 # switch to upload function, switches to the upload selection when selection in menubar
 
 
 def switch_to_delete():
     # deletes ALL Frames
-    db_delete.pack_forget()
-    db_update.pack_forget()
-    db_upload.pack_forget()
+    db_delete_canvas.pack_forget()
+    db_update_canvas.pack_forget()
+    db_upload_canvas.pack_forget()
 
     # makes only the delete frame
-    db_delete.pack()
+    db_delete_canvas.pack(side="left", fill="both", expand=True)
+    # scrollbars
+    db_delete_canvas_scrollbar.pack(side="right", fill="y")
  # switch to upload function, switches to the upload selection when selection in menubar
 
 
 def switch_to_update():
     # deletes ALL Frames
-    db_delete.pack_forget()
-    db_update.pack_forget()
-    db_upload.pack_forget()
+    db_delete_canvas.pack_forget()
+    db_update_canvas.pack_forget()
+    db_upload_canvas.pack_forget()
 
     # makes only the update frame
-    db_update.pack()
+    db_update_canvas.pack(side="left", fill="both", expand=True)
+    # scrollbars
+    db_update_canvas_scrollbar.pack(side="right", fill="y")
 
 
 # Menubar
@@ -929,8 +993,14 @@ label_comment.grid(row=16, column=0, columnspan=2)
 entry_comment.grid(row=17, column=0, columnspan=2)
 # submit button
 submit_button.grid(row=18, column=0, columnspan=2)
-# db_upload frame
+# packing things up
 db_upload.pack()
+db_delete.pack()
+db_update.pack()
+# db_upload frame
+db_upload_canvas.pack(side="left", fill="both", expand=True)
+# scrollbars
+db_upload_canvas_scrollbar.pack(side="right", fill="y")
 # window
 root.config(menu=menubar)
 root.mainloop()
