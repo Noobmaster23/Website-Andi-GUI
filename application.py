@@ -762,9 +762,9 @@ def update_db():
 
     cur = conn.cursor()
 
-    sql_query = "UPDATE images SET category = '{0}', type = '{1}', de_category = '{2}', de_type = '{3}', latin_name = '{4}', last_changed = '{5}' WHERE name = '{6}';".format(
-        db_update_category, db_update_type, db_update_de_category, db_update_de_type, db_update_latin_name, db_update_last_changed, db_update_name)
-    cur.execute(sql_query)
+    sql_query = "UPDATE images SET category = %s, type = %s, de_category = %s, de_type = %s, latin_name = %s, last_changed = %s WHERE name = %s;"
+    cur.execute(sql_query, (db_update_category, db_update_type, db_update_de_category,
+                db_update_de_type, db_update_latin_name, db_update_last_changed, db_update_name))
     conn.commit()
     cur.close()
 
